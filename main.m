@@ -4,17 +4,17 @@ clc
 load('3sources.mat');
 dataname='3sources';  
     % datasets 'MSRC_v1','100Leaves','3sources','BBC','Reuters','Caltech10120'
-%    p          8              8         8        8       8            8
+%    p           9              9        9       9       9            9
 %    a         0.01          0.01        1        10     0.001          10
  meanAC=[];
  meanMI=[];
  stdAC=[];
  stdMI=[];     
- p=8;
+ p=9;
  alpha=1;
 All_result=[];
  for h=1:10
-  opts.maxIter=10; 
+  opts.maxIter=15; 
   opts.p=p;
   opts.alpha=alpha;
   opts.per=0.1;
