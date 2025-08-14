@@ -8,7 +8,7 @@ p=opts.p;
 alpha=opts.alpha;
 maxIter=opts.maxIter; 
 [indices,count]=SelLabSam_Semi_2(Y,per);
-ind=[1:1:n];
+ind=1:n;
 ind(indices)=[];
 testlabel=Y(ind);
 Y=[Y(indices);testlabel];
@@ -18,33 +18,37 @@ Y=[Y(indices);testlabel];
  end
  indices=1:count;
  
- 
 %construct label indicater matrix C
 C= zeros(count,k);
 for i = 1:count
     C(i,Y(i))=1;
 end
 
-[A, ~, L]  = createWs(X,p);
-V= rand(n,k);
+opts.p=p;
+[A, ~, L]  = createWs(X,opts);
 weight=1/view;
+S=zeros(n);
+for i=1:view
+    S=S+A{i}*weight;
+end
+%S=   (S + S') / 2;  
+D=diag(sum(S,2));
+
+Suu=S(count+1:n,count+1:n);
+Sul=S(count+1:n ,1:count);
+Duu=D(count+1:n,count+1:n);
+Dul=D(count+1:n ,1:count);
+V= rand(n-count,k);
+%V= rand(n,k);
 obj=[];
 for iter=1:maxIter
-V(1:count,:)=C; 
     for j=1:view
-     obj(iter,j)=(sum(sum((A{j}-V*V').^2))+alpha*trace(V'*L{j}*V));     
+     obj(iter,j)=(sum(sum((A{j}-[C;V]*[C;V]').^2))+alpha*trace([C;V]'*L{j}*[C;V]));     
     end
     Obj(iter)=sum(obj(iter,:)*weight);
-    SV=zeros(size(n));
-    for i=1:view
-        SV=SV+A{i}*weight;
-    end
-
-    D=diag(sum(SV,1));
-    SVV =(2+alpha)*SV*V;
-    VVV =  V*V'*V;
-    V=(SVV./(VVV+alpha*D*V+eps)).*V;
-
+    F1= (2+alpha)*Suu*V+(2+alpha)*Sul*C;
+    F2=2*V*C'*C+2*V*V'*V+alpha*Duu*V+alpha*Dul*C+eps; 
+    V=V.*(F1./F2) ;
 
 end
    
@@ -53,6 +57,7 @@ end
 end
 
  
+
 
 
 
